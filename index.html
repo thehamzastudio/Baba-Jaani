@@ -480,8 +480,8 @@
         <div class="field">
           <label>Order Type</label>
           <select id="orderType">
-            <option value="delivery">Delivery</option>
             <option value="pickup">Pickup</option>
+            <option value="delivery">Delivery</option>
           </select>
         </div>
         <div class="field">
@@ -497,7 +497,7 @@
     const WHATSAPP_NUMBER = "923331289292";
     const CURRENCY = "Rs";
     const TAX_RATE = 0.00;
-    const DELIVERY_FEE = 50;
+    let DELIVERY_FEE = 0;
 
     const MENU = [
       { id: 1, name: "Chicken Seekh Kebab (2 pcs)", price: 380, cat: "bbq", desc: "Juicy grilled kebabs with mint chutney.", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvt1tsBZ2sXPK5rqHW5Pj9AUSHyaFdbqXReg&s" },
@@ -535,8 +535,19 @@
     function changeQty(id, d) { const i = state.cart.findIndex(x => x.id === id); if (i > -1) { state.cart[i].qty += d; if (state.cart[i].qty <= 0) state.cart.splice(i, 1); } updateCartUI(); }
     function removeItem(id) { state.cart = state.cart.filter(x => x.id !== id); updateCartUI(); }
 
-    function totals() { const s = state.cart.reduce((a, x) => a + x.price * x.qty, 0); const t = Math.round(s * TAX_RATE); return { subtotal: s, tax: t, delivery: DELIVERY_FEE, grand: s + t + DELIVERY_FEE } };
-
+function totals() { 
+  const s = state.cart.reduce((a, x) => a + x.price * x.qty, 0); 
+  const t = Math.round(s * TAX_RATE); 
+  return { subtotal: s, tax: t, delivery: DELIVERY_FEE, grand: s + t + DELIVERY_FEE }; 
+}
+$('#orderType').addEventListener('change', function() {
+  if (this.value === 'pickup') {
+    DELIVERY_FEE = 0;
+  } else {
+    DELIVERY_FEE = 50;
+  }
+  updateCartUI();
+});
     function updateCartUI() {
       $('#cartCount').textContent = state.cart.reduce((a, x) => a + x.qty, 0);
       $('#cartCount2').textContent = $('#cartCount').textContent;
@@ -551,11 +562,32 @@
           <div><strong>${x.name}</strong><div class="cart-meta">${CURRENCY} ${x.price} × ${x.qty}</div><button class="remove" onclick="removeItem(${x.id})">Remove</button></div>
           <div class="qty"><button onclick="changeQty(${x.id},-1)">−</button><span>${x.qty}</span><button onclick="changeQty(${x.id},1)">+</button></div>
         </div>`).join('') : `<div class="empty">Your cart is empty</div>`;
+         
     }
 
-    function buildWhatsAppMessage() { const { subtotal, tax, delivery, grand } = totals(); let lines = [`*Baba Jaani New Order*`, '']; state.cart.forEach(x => lines.push(`• ${x.name} x${x.qty} — ${CURRENCY} ${x.price * x.qty}`)); lines.push('', `Total: ${CURRENCY} ${grand}`, '', `Name: ${$('#custName').value}`); return encodeURIComponent(lines.join('\n')) }
-
-    $('#checkoutForm').addEventListener('submit', e => { e.preventDefault(); if (!state.cart.length) { alert('Cart empty'); return; } window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage()}`, '_blank'); });
+// ...existing code...
+function buildWhatsAppMessage() {
+  const { subtotal, tax, delivery, grand } = totals();
+  let lines = [
+    `*Baba Jaani New Order*`,
+    ''
+  ];
+  state.cart.forEach(x =>
+    lines.push(`• ${x.name} x${x.qty} — ${CURRENCY} ${x.price * x.qty}`)
+  );
+  lines.push(
+    '',
+    `Total: ${CURRENCY} ${grand}`,
+    '',
+    `Name: ${$('#custName').value}`,
+    `Order Type: ${$('#orderType').value}`,
+    `Address: ${$('#custAddress').value}`,
+    `Phone: ${$('#custPhone').value}`
+  );
+  return encodeURIComponent(lines.join('\n'));
+}
+// ...existing code...
+    $('#checkoutForm').addEventListener('submit', e => { e.preventDefault(); if (!state.cart.length) { alert('Cart empty'); return; } window.open(`https://wa.me/923331289292?text=${buildWhatsAppMessage()}`, '_blank'); });
 
     $('#search').addEventListener('input', e => { state.search = e.target.value.toLowerCase(); renderMenu(); });
     $$('.tab').forEach(b => b.addEventListener('click', () => { $$('.tab').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.filterCat = b.dataset.cat; renderMenu(); }));
