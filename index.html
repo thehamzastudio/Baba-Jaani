@@ -544,7 +544,7 @@ $('#orderType').addEventListener('change', function() {
   if (this.value === 'pickup') {
     DELIVERY_FEE = 0;
   } else {
-    DELIVERY_FEE = 50;
+    DELIVERY_FEE = 100;
   }
   updateCartUI();
 });
@@ -587,7 +587,7 @@ function buildWhatsAppMessage() {
   return encodeURIComponent(lines.join('\n'));
 }
 // ...existing code...
-    $('#checkoutForm').addEventListener('submit', e => { e.preventDefault(); if (!state.cart.length) { alert('Cart empty'); return; } window.open(`https://wa.me/923331289292?text=${buildWhatsAppMessage()}`, '_blank'); });
+    $('#checkoutForm').addEventListener('submit', e => { e.preventDefault(); if (!state.cart.length) { alert('Cart empty'); return; } window.open(`https://wa.me/923122323010?text=${buildWhatsAppMessage()}`, '_blank'); });
 
     $('#search').addEventListener('input', e => { state.search = e.target.value.toLowerCase(); renderMenu(); });
     $$('.tab').forEach(b => b.addEventListener('click', () => { $$('.tab').forEach(x => x.classList.remove('active')); b.classList.add('active'); state.filterCat = b.dataset.cat; renderMenu(); }));
@@ -600,4 +600,5 @@ function buildWhatsAppMessage() {
 </body>
 
 </html>
+
 
